@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project etherip-master">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <target name="create_run_jar">
+        <jar destfile="/home/rgimenes/ethernetip-master.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="Principal"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <zipfileset excludes="META-INF/*.SF" src="/opt/softwares/sdk/eclipse_java_4.3.2/plugins/org.junit_4.11.0.v201303080030/junit.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="/opt/softwares/sdk/eclipse_java_4.3.2/plugins/org.hamcrest.core_1.3.0.v201303031735.jar"/>
+            <fileset dir="/home/rgimenes/workspace/etherip-master/bin"/>
+        </jar>
+    </target>
+</project>
