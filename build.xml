@@ -10,7 +10,7 @@
             </manifest>
             <zipfileset excludes="META-INF/*.SF" src="/opt/softwares/sdk/eclipse_java_4.3.2/plugins/org.junit_4.11.0.v201303080030/junit.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="/opt/softwares/sdk/eclipse_java_4.3.2/plugins/org.hamcrest.core_1.3.0.v201303031735.jar"/>
-            <fileset dir="/home/rgimenes/workspace/etherip-master/bin"/>
+            <fileset dir="/home/rgimenes/workspace/etherip/bin"/>
         </jar>
     </target>
 </project>
