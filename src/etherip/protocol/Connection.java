@@ -58,6 +58,19 @@ public class Connection implements AutoCloseable
 		buffer.order(BYTE_ORDER);
 	}
 
+	   public Connection(final String address, final int slot, int portp) throws Exception
+	    {
+	        this.port=portp;
+	        logger.log(Level.INFO, "Connecting to {0}:{1}", new Object[] { address, String.format("0x%04X", port) });
+	        this.slot = slot;
+	        channel = AsynchronousSocketChannel.open();
+	        channel.connect(new InetSocketAddress(address, port)).get(timeout_ms, MILLISECONDS);
+	        
+	        buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
+	        buffer.order(BYTE_ORDER);
+	    }
+
+	
 	/** @return Slot number 0, 1, .. of the controller within PLC crate */
 	public int getSlot()
     {

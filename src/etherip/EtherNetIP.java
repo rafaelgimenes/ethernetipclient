@@ -13,6 +13,7 @@ import static etherip.types.CNPath.Identity;
 import static etherip.types.CNPath.MessageRouter;
 import static etherip.types.CNService.Get_Attribute_Single;
 
+import java.security.Identity;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,7 +46,7 @@ public class EtherNetIP implements AutoCloseable
 	final private String address;
 	final private int slot;
 	private Connection connection = null;
-
+	private int port=0xAF12;//44818
 	private DeviceInfo device_info;
 
 	/** Initialize
@@ -57,12 +58,20 @@ public class EtherNetIP implements AutoCloseable
 		this.slot = slot;
 	}
 	
+	public EtherNetIP(final String address, final int slot, int portp)
+    {
+        this.address = address;
+        this.slot = slot;
+        this.port = portp;
+    }
+	
 	/** Connect to device, register session, obtain basic info
 	 *  @throws Exception on error
 	 */
 	public void connect() throws Exception
 	{
-		connection = new Connection(address, slot);
+		//connection = new Connection(address, slot);
+	    connection = new Connection(address, slot, port);
 		listServices();
 		registerSession();
 		getDeviceInfo();
@@ -241,3 +250,4 @@ public class EtherNetIP implements AutoCloseable
 		return buf.toString();
 	}
 }
+
