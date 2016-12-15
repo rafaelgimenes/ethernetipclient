@@ -564,6 +564,19 @@ public class Utils
      return st.replaceAll("[^\\d.]", "");
      
  }
+ 
+ public static boolean isNumeric(String str)  
+ {  
+   try  
+   {  
+     double d = Double.parseDouble(str);  
+   }  
+   catch(NumberFormatException nfe)  
+   {  
+     return false;  
+   }  
+   return true;  
+ }
 
 
 }

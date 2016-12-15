@@ -1,26 +1,36 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.sun.xml.internal.ws.util.StringUtils;
+
 import etherip.EtherNetIP;
 import etherip.types.CIPData;
+import sun.reflect.generics.tree.ArrayTypeSignature;
 
 
 public class Principal {
 
     public static void main(String[] args) {
         //Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
-    	String versao = "0.2";
+    	String versao = "0.3";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
         int slotX = -1;
         String tags[] = null;//Nomes das tags
+        String tags_aux[] = null;//Nomes das tags
         String tipos_tag[] = null; //tipo das tags real, int dint.
         String valores_str[]=null;
         EtherNetIP plc=null;
         String argumentos="";
+        String invalidos = "";
         
         try {
         	for (int i = 0; i < args.length; i++) {
-        		argumentos+=args[i];
+        		argumentos+=args[i]+" ";
 			}
+        	System.out.println(argumentos);
             ip = args[0];
             porta = Integer.parseInt(args [1]);
             slotX = Integer.parseInt(args [2]);
@@ -29,7 +39,7 @@ public class Principal {
             valores_str = args[5].split("\\,");
             valores = new CIPData[valores_str.length];
             
-            for (int i = 0; i < args.length; i++) {
+          /*  for (int i = 0; i < args.length; i++) {
                 System.out.println(args[i]);
             }
             for (int i = 0; i < tags.length; i++) {
@@ -37,7 +47,7 @@ public class Principal {
             }
             for (int i = 0; i < valores_str.length; i++) {
                 System.out.println(valores_str[i]);
-            }
+            }*/
         } catch (Exception e) {
         	StackTraceElement l = e.getStackTrace()[0];
 			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+e.getMessage() +""+ e.getStackTrace();
@@ -52,13 +62,18 @@ public class Principal {
         
         if(tags!=null&&valores_str!=null&&slotX!=-1&&ip!=null) {
             for (int i = 0; i < valores.length; i++) {
-                
                 //remove chars deixa só numero
                 valores_str[i]=valores_str[i].replaceAll("[^0-9.-]", "");
-                Number a = Double.parseDouble(valores_str[i]);
+                Number a = null;
+                if(valores_str[i].equals("")||(!Utils.isNumeric(valores_str[i]))){
+                		invalidos=invalidos+i+",";
+                }else{
+                	a = Double.parseDouble(valores_str[i]);
+                }
+                
                 try {
-                    valores[i]=new CIPData(retornaType(tipos_tag[i]), 1);
-                    valores[i].set(0,a);
+                		valores[i]=new CIPData(retornaType(tipos_tag[i]), 1);
+                		valores[i].set(0,a);
                 } catch (IndexOutOfBoundsException e) {
                     Utils.escreveTxt("EthernetIPClienteErroIndex.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Index OUT: "+e.toString(),true);
                    
@@ -68,7 +83,21 @@ public class Principal {
             }
         }
         try {
-            if(valores!=null) {
+        	 //remover invalidos
+        	if(invalidos.length()>0){
+	            String remover[] = invalidos.split("\\,");
+	            int cntRemove=0;
+	            for (int j = 0; j < remover.length; j++) {
+	            	int x = 0;
+	            		x = Integer.parseInt(remover[j]);
+	            		x=x-cntRemove;
+	            	tags =  removeElement(tags, x);
+	            	tipos_tag =  removeElement(tipos_tag, x);
+	            	valores =  removeElement(valores, x);
+	            	cntRemove++;
+	            }
+        	}
+        	if(valores!=null) {
                 plc = new EtherNetIP(ip, slotX, porta);
                 plc.connect();
                 plc.writeTags(tags, valores);
@@ -95,5 +124,18 @@ public class Principal {
         return null;
         
     }
-
+    public static String[] removeElement(String[] original, int element){
+    	String[] n = new String[original.length - 1];
+        System.arraycopy(original, 0, n, 0, element );
+        System.arraycopy(original, element+1, n, element, original.length - element-1);
+        return n;
+    }
+    
+    public static CIPData[] removeElement(CIPData[] original, int element){
+    	CIPData[] n = new CIPData[original.length - 1];
+        System.arraycopy(original, 0, n, 0, element );
+        System.arraycopy(original, element+1, n, element, original.length - element-1);
+        return n;
+    }
+    
 }
