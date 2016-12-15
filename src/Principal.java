@@ -6,6 +6,7 @@ public class Principal {
 
     public static void main(String[] args) {
         //Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
+    	String versao = "0.2";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
@@ -14,7 +15,12 @@ public class Principal {
         String tipos_tag[] = null; //tipo das tags real, int dint.
         String valores_str[]=null;
         EtherNetIP plc=null;
+        String argumentos="";
+        
         try {
+        	for (int i = 0; i < args.length; i++) {
+        		argumentos+=args[i];
+			}
             ip = args[0];
             porta = Integer.parseInt(args [1]);
             slotX = Integer.parseInt(args [2]);
@@ -33,7 +39,9 @@ public class Principal {
                 System.out.println(valores_str[i]);
             }
         } catch (Exception e) {
-            Utils.escreveTxt("EthernetIPClienteErroSeparandoArgs.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\nValues sizes does not match",true);
+        	StackTraceElement l = e.getStackTrace()[0];
+			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+e.getMessage() +""+ e.getStackTrace();
+            Utils.escreveTxt("EthernetIPClienteErroSeparandoArgs.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\nValues sizes does not match\n"+erro+"\n"+argumentos+"\n",true);
             System.exit(1);
         }
         
@@ -68,7 +76,9 @@ public class Principal {
             }
 
         } catch (Exception e) {
-            Utils.escreveTxt("EthernetIPClienteErrConexao.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Conection: "+e.toString(),true);
+        	StackTraceElement l = e.getStackTrace()[0];
+			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
+            Utils.escreveTxt("EthernetIPClienteErrConexao.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro,true);
         }
     }
     
