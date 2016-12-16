@@ -64,7 +64,7 @@ public class Principal {
             for (int i = 0; i < valores.length; i++) {
                 //remove chars deixa só numero
                 valores_str[i]=valores_str[i].replaceAll("[^0-9.-]", "");
-                Number a = null;
+                Number a = 99999.9;
                 if(valores_str[i].equals("")||(!Utils.isNumeric(valores_str[i]))){
                 		invalidos=invalidos+i+",";
                 }else{
@@ -75,10 +75,13 @@ public class Principal {
                 		valores[i]=new CIPData(retornaType(tipos_tag[i]), 1);
                 		valores[i].set(0,a);
                 } catch (IndexOutOfBoundsException e) {
-                    Utils.escreveTxt("EthernetIPClienteErroIndex.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Index OUT: "+e.toString(),true);
-                   
+                	StackTraceElement l = e.getStackTrace()[0];
+        			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
+                    Utils.escreveTxt("EthernetIPClienteErroIndex.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Index OUT: "+erro,true);
                 } catch (Exception e) {
-                    Utils.escreveTxt("EthernetIPClienteErroGeneral.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Exception: "+e.toString(),true);
+                	StackTraceElement l = e.getStackTrace()[0];
+        			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
+                    Utils.escreveTxt("EthernetIPClienteErroGeneral.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Exception: "+erro,true);
                 }
             }
         }
