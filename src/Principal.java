@@ -13,7 +13,7 @@ public class Principal {
 
     public static void main(String[] args) {
         //Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
-    	String versao = "0.3";
+    	String versao = "0.4";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
@@ -30,7 +30,6 @@ public class Principal {
         	for (int i = 0; i < args.length; i++) {
         		argumentos+=args[i]+" ";
 			}
-        	System.out.println(argumentos);
             ip = args[0];
             porta = Integer.parseInt(args [1]);
             slotX = Integer.parseInt(args [2]);
@@ -56,7 +55,7 @@ public class Principal {
         }
         
         if(tags.length!=valores.length) {
-            Utils.escreveTxt("EthernetIPClienteErroSeparandoArgs.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\nValues sizes does not match",true);
+            Utils.escreveTxt("EthernetIPClienteErroSeparandoArgs.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\nValues sizes does not match"+":"+argumentos,true);
             System.exit(1);
         }
         
@@ -77,11 +76,11 @@ public class Principal {
                 } catch (IndexOutOfBoundsException e) {
                 	StackTraceElement l = e.getStackTrace()[0];
         			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
-                    Utils.escreveTxt("EthernetIPClienteErroIndex.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Index OUT: "+erro,true);
+                    Utils.escreveTxt("EthernetIPClienteErroIndex.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Index OUT: "+erro + " " +argumentos ,true);
                 } catch (Exception e) {
                 	StackTraceElement l = e.getStackTrace()[0];
         			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
-                    Utils.escreveTxt("EthernetIPClienteErroGeneral.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Exception: "+erro,true);
+                    Utils.escreveTxt("EthernetIPClienteErroGeneral.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Exception: "+erro + " " + argumentos,true);
                 }
             }
         }
@@ -110,7 +109,7 @@ public class Principal {
         } catch (Exception e) {
         	StackTraceElement l = e.getStackTrace()[0];
 			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
-            Utils.escreveTxt("EthernetIPClienteErrConexao.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro,true);
+            Utils.escreveTxt("EthernetIPClienteErrConexao.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro +" "+ argumentos,true);
         }
     }
     
