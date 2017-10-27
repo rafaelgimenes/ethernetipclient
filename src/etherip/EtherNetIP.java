@@ -48,7 +48,7 @@ public class EtherNetIP implements AutoCloseable
 	private Connection connection = null;
 	private int port=0xAF12;//44818
 	private DeviceInfo device_info;
-
+	public static int logWriter=0;
 	/** Initialize
 	 *  @param address IP address of device
 	 */

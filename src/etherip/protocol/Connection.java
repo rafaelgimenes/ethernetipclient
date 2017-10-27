@@ -17,6 +17,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.logging.Level;
 
 import etherip.util.Hexdump;
+import etherip.util.Utils;
 
 /** Connection to EtherNet/IP device
  * 
@@ -114,9 +115,14 @@ public class Connection implements AutoCloseable
 			logger.finer("Protocol Encoding\n" + log.toString());
 		
 		buffer.flip();
-		if (logger.isLoggable(Level.FINEST))
-			logger.log(Level.FINEST, "Data sent ({0} bytes):\n{1}",
+		if (logger.isLoggable(Level.FINEST)/*||1==1*/){
+			logger.log(Level.INFO, "Data sent ({0} bytes):\n{1}",
 					new Object[] { buffer.remaining(), Hexdump.toHexdump(buffer) });
+			etherip.util.Utils.escreveTxt("EthernetIPClienteSent.txt","\n"+
+					Utils.pegarData2()+" "+Utils.pegarHora()+" write: "+
+					new Object[] { buffer.remaining(), Hexdump.toHexdump(buffer) }
+					,true);
+		}
 		
 		int to_write = buffer.limit();
 		while (to_write > 0)
@@ -145,8 +151,8 @@ public class Connection implements AutoCloseable
 		// Prepare to decode
 		buffer.flip();
 
-		if (logger.isLoggable(Level.FINEST))
-			logger.log(Level.FINEST, "Data read ({0} bytes):\n{1}",
+		if (logger.isLoggable(Level.FINEST)/*||1==1*/)
+			logger.log(Level.INFO, "Data read ({0} bytes):\n{1}",
 					new Object[] { buffer.remaining(), Hexdump.toHexdump(buffer) });
 
 		final StringBuilder log = logger.isLoggable(Level.FINER) ? new StringBuilder() : null;

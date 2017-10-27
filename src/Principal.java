@@ -1,3 +1,6 @@
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -6,14 +9,15 @@ import com.sun.xml.internal.ws.util.StringUtils;
 
 import etherip.EtherNetIP;
 import etherip.types.CIPData;
+import etherip.util.Utils;
 import sun.reflect.generics.tree.ArrayTypeSignature;
 
 
 public class Principal {
-
+	
     public static void main(String[] args) {
         //Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
-    	String versao = "0.4";
+    	String versao = "0.5";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
@@ -25,6 +29,7 @@ public class Principal {
         EtherNetIP plc=null;
         String argumentos="";
         String invalidos = "";
+         
         
         try {
         	for (int i = 0; i < args.length; i++) {
@@ -37,7 +42,7 @@ public class Principal {
             tipos_tag = args[4].split("\\,");
             valores_str = args[5].split("\\,");
             valores = new CIPData[valores_str.length];
-            
+           
           /*  for (int i = 0; i < args.length; i++) {
                 System.out.println(args[i]);
             }
@@ -101,15 +106,37 @@ public class Principal {
         	}
         	if(valores!=null) {
                 plc = new EtherNetIP(ip, slotX, porta);
-                plc.connect();
-                plc.writeTags(tags, valores);
-                plc.close();
+                try {
+					plc.connect();
+				} catch (Exception e) {
+					Writer writer = new StringWriter();
+					e.printStackTrace(new PrintWriter(writer));
+					StackTraceElement l = e.getStackTrace()[0];
+					String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString() + writer.toString(); ;
+		            Utils.escreveTxt("EthernetIPClienteErrConnection.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro +" "+ argumentos,true);
+					e.printStackTrace();
+				}
+                
+                try {
+					plc.writeTags(tags, valores);
+				} catch (Exception e) {
+					Writer writer = new StringWriter();
+					e.printStackTrace(new PrintWriter(writer));
+					StackTraceElement l = e.getStackTrace()[0];
+					String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString() + writer.toString(); ;
+
+					Utils.escreveTxt("EthernetIPClienteErrWriteTags.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro +" "+ argumentos,true);
+					e.printStackTrace();
+				}
+				plc.close();
             }
 
         } catch (Exception e) {
-        	StackTraceElement l = e.getStackTrace()[0];
-			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
-            Utils.escreveTxt("EthernetIPClienteErrConexao.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro +" "+ argumentos,true);
+			Writer writer = new StringWriter();
+			e.printStackTrace(new PrintWriter(writer));
+			StackTraceElement l = e.getStackTrace()[0];
+			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString() + writer.toString(); ;
+            Utils.escreveTxt("EthernetIPClienteErrConexaoGeral.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro +" "+ argumentos,true);
         }
     }
     
