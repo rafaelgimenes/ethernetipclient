@@ -115,7 +115,7 @@ public class Connection implements AutoCloseable
 			logger.finer("Protocol Encoding\n" + log.toString());
 		
 		buffer.flip();
-		if (logger.isLoggable(Level.FINEST)/*||1==1*/){
+		if (logger.isLoggable(Level.FINEST)||1==1){
 			logger.log(Level.INFO, "Data sent ({0} bytes):\n{1}",
 					new Object[] { buffer.remaining(), Hexdump.toHexdump(buffer) });
 			etherip.util.Utils.escreveTxt("EthernetIPClienteSent.txt","\n"+
@@ -151,7 +151,7 @@ public class Connection implements AutoCloseable
 		// Prepare to decode
 		buffer.flip();
 
-		if (logger.isLoggable(Level.FINEST)/*||1==1*/)
+		if (logger.isLoggable(Level.FINEST)||1==1)
 			logger.log(Level.INFO, "Data read ({0} bytes):\n{1}",
 					new Object[] { buffer.remaining(), Hexdump.toHexdump(buffer) });
 
