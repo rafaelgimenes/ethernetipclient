@@ -10,7 +10,7 @@ public class Principal {
 	
     public static void main(String[] args) {
         //Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
-    	String versao = "0.5";
+    	String versao = "0.6";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
@@ -22,7 +22,8 @@ public class Principal {
         EtherNetIP plc=null;
         String argumentos="";
         String invalidos = "";
-         
+        
+        System.out.println("EtheIPClient:"+versao);
         
         try {
         	for (int i = 0; i < args.length; i++) {
@@ -49,11 +50,13 @@ public class Principal {
         	StackTraceElement l = e.getStackTrace()[0];
 			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+e.getMessage() +""+ e.getStackTrace();
             Utils.escreveTxt("EthernetIPClienteErroSeparandoArgs.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\nValues sizes does not match\n"+erro+"\n"+argumentos+"\n",true);
+            System.out.println("Error: Getting the args.");
             System.exit(1);
         }
         
         if(tags.length!=valores.length) {
             Utils.escreveTxt("EthernetIPClienteErroSeparandoArgs.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\nValues sizes does not match"+":"+argumentos,true);
+            System.out.println("Error: Getting the args.");
             System.exit(1);
         }
         
@@ -75,10 +78,12 @@ public class Principal {
                 	StackTraceElement l = e.getStackTrace()[0];
         			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
                     Utils.escreveTxt("EthernetIPClienteErroIndex.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Index OUT: "+erro + " " +argumentos ,true);
+                    System.out.println("Error: Handingle the data");
                 } catch (Exception e) {
                 	StackTraceElement l = e.getStackTrace()[0];
         			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
                     Utils.escreveTxt("EthernetIPClienteErroGeneral.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Exception: "+erro + " " + argumentos,true);
+                    System.out.println("Error: Handingle/Parsing the data");
                 }
             }
         }
@@ -101,25 +106,27 @@ public class Principal {
                 plc = new EtherNetIP(ip, slotX, porta);
                 try {
 					plc.connect();
+					System.out.println("Connected: "+plc.toString());
 				} catch (Exception e) {
 					Writer writer = new StringWriter();
 					e.printStackTrace(new PrintWriter(writer));
 					StackTraceElement l = e.getStackTrace()[0];
 					String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString() + writer.toString(); ;
 		            Utils.escreveTxt("EthernetIPClienteErrConnection.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro +" "+ argumentos,true);
-					e.printStackTrace();
+		            System.out.println("Error: Opening the Connection.");
+					
 				}
                 
                 try {
 					plc.writeTags(tags, valores);
+					System.out.println("Written:"+ tags.toString() + " values: " + valores.toString());
 				} catch (Exception e) {
 					Writer writer = new StringWriter();
 					e.printStackTrace(new PrintWriter(writer));
 					StackTraceElement l = e.getStackTrace()[0];
 					String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString() + writer.toString(); ;
-
 					Utils.escreveTxt("EthernetIPClienteErrWriteTags.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro +" "+ argumentos,true);
-					e.printStackTrace();
+					System.out.println("Error: Writing the values");
 				}
 				plc.close();
             }
@@ -130,6 +137,7 @@ public class Principal {
 			StackTraceElement l = e.getStackTrace()[0];
 			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString() + writer.toString(); ;
             Utils.escreveTxt("EthernetIPClienteErrConexaoGeral.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro +" "+ argumentos,true);
+            System.out.println("Error: General " + erro);
         }
     }
     
