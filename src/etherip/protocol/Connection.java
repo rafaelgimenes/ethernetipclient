@@ -50,7 +50,7 @@ public class Connection implements AutoCloseable
 	 */
 	public Connection(final String address, final int slot) throws Exception
 	{
-	    logger.log(Level.INFO, "Connecting to {0}:{1}", new Object[] { address, String.format("0x%04X", port) });
+	    logger.log(Level.FINE, "Connecting to {0}:{1}", new Object[] { address, String.format("0x%04X", port) });
 	    this.slot = slot;
         channel = AsynchronousSocketChannel.open();
 		channel.connect(new InetSocketAddress(address, port)).get(timeout_ms, MILLISECONDS);
@@ -62,7 +62,7 @@ public class Connection implements AutoCloseable
 	   public Connection(final String address, final int slot, int portp) throws Exception
 	    {
 	        this.port=portp;
-	        logger.log(Level.INFO, "Connecting to {0}:{1}", new Object[] { address, String.format("0x%04X", port) });
+	       // logger.log(Level.INFO, "Connecting to {0}:{1}", new Object[] { address, String.format("0x%04X", port) });
 	        this.slot = slot;
 	        channel = AsynchronousSocketChannel.open();
 	        channel.connect(new InetSocketAddress(address, port)).get(timeout_ms, MILLISECONDS);
@@ -115,9 +115,9 @@ public class Connection implements AutoCloseable
 			logger.finer("Protocol Encoding\n" + log.toString());
 		
 		buffer.flip();
-		if (logger.isLoggable(Level.FINEST)||1==1){
-			logger.log(Level.INFO, "Data sent ({0} bytes):\n{1}",
-					new Object[] { buffer.remaining(), Hexdump.toHexdump(buffer) });
+		if (logger.isLoggable(Level.FINEST)){
+			//logger.log(Level.INFO, "Data sent ({0} bytes):\n{1}",
+				//	new Object[] { buffer.remaining(), Hexdump.toHexdump(buffer) });
 			etherip.util.Utils.escreveTxt("EthernetIPClienteSent.txt","\n"+
 					Utils.pegarData2()+" "+Utils.pegarHora()+" write: "+
 					new Object[] { buffer.remaining(), Hexdump.toHexdump(buffer) }
@@ -151,7 +151,7 @@ public class Connection implements AutoCloseable
 		// Prepare to decode
 		buffer.flip();
 
-		if (logger.isLoggable(Level.FINEST)||1==1)
+		if (logger.isLoggable(Level.FINEST))
 			logger.log(Level.INFO, "Data read ({0} bytes):\n{1}",
 					new Object[] { buffer.remaining(), Hexdump.toHexdump(buffer) });
 

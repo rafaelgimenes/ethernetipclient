@@ -9,8 +9,9 @@ import etherip.util.Utils;
 public class Principal {
 	
     public static void main(String[] args) {
-        //Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
-    	String versao = "0.6";
+       // enip_server -v  TEMP=REAL
+    	//Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
+    	String versao = "0.7";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
@@ -114,12 +115,18 @@ public class Principal {
 					String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString() + writer.toString(); ;
 		            Utils.escreveTxt("EthernetIPClienteErrConnection.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+" Conection: "+erro +" "+ argumentos,true);
 		            System.out.println("Error: Opening the Connection.");
-					
+					System.exit(1);
 				}
                 
                 try {
 					plc.writeTags(tags, valores);
-					System.out.println("Written:"+ tags.toString() + " values: " + valores.toString());
+					String aux="";
+					String auxVal="";
+					for (int j = 0; j < tags.length; j++) {
+						aux+=tags[j]+" ";
+						auxVal+=valores_str[j]+" ";
+					}
+					System.out.println("Data Sent:"+ aux + " values: " + auxVal);
 				} catch (Exception e) {
 					Writer writer = new StringWriter();
 					e.printStackTrace(new PrintWriter(writer));
