@@ -114,7 +114,7 @@ public class EtherNetIP implements AutoCloseable
 		final short serial = getShortAttribute(6);
 		final String name = getStringAttribute(7);
 		device_info = new DeviceInfo(vendor, device_type, revision, serial, name);
-		logger.log(Level.INFO, "{0}", device_info);
+		//logger.log(Level.INFO, "{0}", device_info);
     }
 
 	/** Helper for reading a 'short' typed attribute

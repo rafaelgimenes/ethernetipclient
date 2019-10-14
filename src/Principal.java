@@ -11,7 +11,7 @@ public class Principal {
     public static void main(String[] args) {
        // enip_server -v  TEMP=REAL
     	//Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
-    	String versao = "0.7";
+    	String versao = "0.8";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
@@ -107,7 +107,7 @@ public class Principal {
                 plc = new EtherNetIP(ip, slotX, porta);
                 try {
 					plc.connect();
-					System.out.println("Connected: "+plc.toString());
+					//System.out.println("Connected: "+plc.toString());
 				} catch (Exception e) {
 					Writer writer = new StringWriter();
 					e.printStackTrace(new PrintWriter(writer));
