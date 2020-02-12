@@ -40,7 +40,7 @@ public class Connection implements AutoCloseable
 	
 	private int session = 0;
 
-	private long timeout_ms = 2000;
+	private long timeout_ms = 5000;
 	private int port = 0xAF12;
 	
 	/** Initialize
