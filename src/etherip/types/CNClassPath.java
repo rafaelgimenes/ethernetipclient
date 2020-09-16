@@ -8,73 +8,195 @@
 package etherip.types;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-
-/** Control Net Path for class, instance, attribute
- * 
- *  <p>Example (with suitable static import):
- *  <p><code>CNPath path = Identity.instance(1).attr(7)</code>
- *  @author Kay Kasemir
+/**
+ * Control Net Path for class, instance, attribute
+ * <p>
+ * Example (with suitable static import):
+ * <p>
+ * <code>CNPath path = Identity.instance(1).attr(7)</code>
+ *
+ * @author Kay Kasemir, László Pataki
  */
+@SuppressWarnings("nls")
 public class CNClassPath extends CNPath
 {
-	final private int class_code;
-	final private String class_name;
-	private int instance = 1, attr = 0;
+    private int class_code;
+    private String class_name;
+    private int instance = 1, attr = 0;
 
-	protected CNClassPath(final int class_code, final String class_name)
-	{
-		this.class_code = class_code;
-		this.class_name = class_name;
-	}
-	
-	public CNClassPath instance(final int instance)
-	{
-		this.instance = instance;
-		return this;
-	}
+    public CNClassPath()
+    {
+    }
 
-	public CNPath attr(final int attr)
-	{
-		this.attr = attr;
-		return this;
-	}
-	
-	/** @return Path length in words */
+    protected CNClassPath(final int class_code, final String class_name)
+    {
+        this.class_code = class_code;
+        this.class_name = class_name;
+    }
+
+    public CNClassPath instance(final int instance)
+    {
+        this.instance = instance;
+        return this;
+    }
+
+    public CNPath attr(final int attr)
+    {
+        this.attr = attr;
+        return this;
+    }
+
+    /** @return Path length in words */
     public byte getPathLength()
-	{
-    	return attr == 0 ? (byte)2 : (byte)3;
-	}
+    {
+        return (byte) (getRequestSize() / 2);
+    }
 
-	@Override
+    @Override
     public int getRequestSize()
-    {   // Convert words into bytes
-	    return getPathLength() * 2;
+    {
+    	int size = 4; // a base path with 2 single byte elements
+    	if (shortClassId()) {
+    		size += 2;
+    	}
+    	if (shortInstanceId()) {
+    		size += 2;
+    	}
+    	if (hasAttribute()) {
+    		size += 2;
+    		if (shortAttributeId()) {
+        		size += 2;
+    		}
+    	}
+        return size;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void encode(final ByteBuffer buf, final StringBuilder log)
+    {
+        buf.put(this.getPathLength());
+        buf.put((byte) classSegmentType());
+        if (shortClassId()) {
+        	buf.put((byte) 0); // Padding
+        	buf.putShort((short) this.class_code);
+        }
+        else {
+        	buf.put((byte) this.class_code);
+        }
+        
+        buf.put((byte) instanceSegmentType());
+        if (shortInstanceId()) {
+        	buf.put((byte) 0); // Padding
+        	buf.putShort((short) this.instance);
+        }
+        else {
+        	buf.put((byte) this.instance);
+        }
+
+        if (hasAttribute())
+        {
+            buf.put((byte) attributeSegmentType());
+            if (shortAttributeId()) {
+            	buf.put((byte) 0); // Padding
+            	buf.putShort((short) this.attr);
+            }
+            else {
+            	buf.put((byte) this.attr);
+            }
+        }
     }
     
-    /** {@inheritDoc} */
-	@Override
-    public void encode(final ByteBuffer buf, final StringBuilder log)
-	{
-		buf.put(getPathLength());
-		buf.put((byte) 0x20);
-		buf.put((byte) class_code);
-		buf.put((byte) 0x24);
-		buf.put((byte) instance);
-		if (attr > 0)
-		{
-			buf.put((byte) 0x30);
-			buf.put((byte) attr);
-		}
+    private byte classSegmentType() {
+    	if (shortClassId()) {
+    		return 0x21;
+    	}
+		return 0x20;
+    }
+
+	private boolean shortClassId() {
+		return this.class_code > 0xFF;
 	}
+
+    private byte instanceSegmentType() {
+    	if (shortInstanceId()) {
+    		return 0x25;
+    	}
+		return 0x24;
+    }
+
+	private boolean shortInstanceId() {
+		return this.instance > 0xFF;
+	}
+
+    private boolean hasAttribute() {
+    	return this.attr > 0;
+    }
     
-	@Override
-    public String toString()
-	{
-		if (attr > 0)
-			return String.format("Path (3 el) Class(0x20) 0x%X (%s), instance(0x24) %d, attrib.(0x30) 0x%X",
-	                   class_code, class_name, instance, attr);
-		return String.format("Path (2 el) Class(0x20) 0x%X (%s), instance(0x24) %d",
-				class_code, class_name, instance);
+    private byte attributeSegmentType() {
+    	if (shortAttributeId()) {
+    		return 0x31;
+    	}
+		return 0x30;
+    }
+
+	private boolean shortAttributeId() {
+		return this.attr > 0xFF;
 	}
+
+    @Override
+    public String toString()
+    {
+    	StringBuilder description = new StringBuilder();
+    	description.append("Path ");
+    	if (hasAttribute()) {
+    		description.append("(3 el)");
+    	}
+    	else {
+    		description.append("(2 el)");
+    	}
+		description.append(" Class(0x").append(Integer.toHexString(classSegmentType())).append(" ");
+		description.append("0x").append(Integer.toHexString(this.class_code)).append(") ");
+		description.append(this.class_name);
+		
+		description.append(", instance(0x").append(Integer.toHexString(instanceSegmentType())).append(") ").append(this.instance);
+		
+    	if (hasAttribute()) {
+    		description.append(", attribute(0x").append(Integer.toHexString(attributeSegmentType())).append(") ").append(this.attr);
+    	}
+    	return description.toString();
+    }
+
+    @Override
+    public int getResponseSize(final ByteBuffer buf) throws Exception
+    {
+        return 2 + this.getPathLength() * 2;
+    }
+
+    @Override
+    public void decode(final ByteBuffer buf, int available,
+            final StringBuilder log) throws Exception
+    {
+        final byte[] raw = new byte[2];
+        buf.get(raw);
+        available = ByteBuffer.wrap(raw).order(ByteOrder.LITTLE_ENDIAN)
+                .getShort();
+
+        if (raw[0] == 0x02)
+        {
+            buf.get(raw);
+            if (raw[0] == 0x20)
+            {
+                this.class_code = new Integer(raw[1]);
+                this.class_name = "Ethernet Link";
+            }
+            buf.get(raw);
+            if (raw[0] == 0x24)
+            {
+                this.instance(new Integer(raw[1]));
+            }
+        }
+    }
 }

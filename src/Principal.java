@@ -4,14 +4,15 @@ import java.io.Writer;
 import etherip.EtherNetIP;
 import etherip.types.CIPData;
 import etherip.util.Utils;
-
+import etherip.types.CIPData;
+import etherip.types.CIPData.Type;
 
 public class Principal {
 	
     public static void main(String[] args) {
        // enip_server -v  TEMP=REAL
     	//Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
-    	String versao = "0.9";
+    	String versao = "0.10";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
@@ -19,6 +20,7 @@ public class Principal {
         String tags[] = null;//Nomes das tags
         String tags_aux[] = null;//Nomes das tags
         String tipos_tag[] = null; //tipo das tags real, int dint.
+        String tipos_tag_size[] = null; //[0]
         String valores_str[]=null;
         EtherNetIP plc=null;
         String argumentos="";
@@ -35,7 +37,7 @@ public class Principal {
             slotX = Integer.parseInt(args [2]);
             tags = args[3].split("\\,");
             tipos_tag = args[4].split("\\,");
-            valores_str = args[5].split("\\,");
+            valores_str = args[5].split(",(?=[^\\}]*(?:\\{|$))");
             valores = new CIPData[valores_str.length];
            
           /*  for (int i = 0; i < args.length; i++) {
@@ -63,29 +65,59 @@ public class Principal {
         
         if(tags!=null&&valores_str!=null&&slotX!=-1&&ip!=null) {
             for (int i = 0; i < valores.length; i++) {
-                //remove chars deixa só numero
-                valores_str[i]=valores_str[i].replaceAll("[^0-9.-]", "");
-                Number a = 99999.9;
-                if(valores_str[i].equals("")||(!Utils.isNumeric(valores_str[i]))){
-                		invalidos=invalidos+i+",";
-                }else{
-                	a = Double.parseDouble(valores_str[i]);
-                }
-                
-                try {
-                		valores[i]=new CIPData(retornaType(tipos_tag[i]), 1);
-                		valores[i].set(0,a);
-                } catch (IndexOutOfBoundsException e) {
-                	StackTraceElement l = e.getStackTrace()[0];
-        			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
-                    Utils.escreveTxt("EthernetIPClienteErroIndex.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Index OUT: "+erro + " " +argumentos ,true);
-                    System.out.println("Error: Handingle the data");
-                } catch (Exception e) {
-                	StackTraceElement l = e.getStackTrace()[0];
-        			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
-                    Utils.escreveTxt("EthernetIPClienteErroGeneral.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Exception: "+erro + " " + argumentos,true);
-                    System.out.println("Error: Handingle/Parsing the data");
-                }
+            		if(!tipos_tag[i].contains("{")){
+		            	//remove chars deixa só numero
+		                valores_str[i]=valores_str[i].replaceAll("[^0-9.-]", "");
+		                Number a = 99999.9;
+		                if(valores_str[i].equals("")||(!Utils.isNumeric(valores_str[i]))){
+		                		invalidos=invalidos+i+",";
+		                }else{
+		                	a = Double.parseDouble(valores_str[i]);
+		                }
+		                
+		                try {
+		                		valores[i]=new CIPData(retornaType(tipos_tag[i]), 1);
+		                		valores[i].set(0,a);
+		                } catch (IndexOutOfBoundsException e) {
+		                	StackTraceElement l = e.getStackTrace()[0];
+		        			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
+		                    Utils.escreveTxt("EthernetIPClienteErroIndex.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Index OUT: "+erro + " " +argumentos ,true);
+		                    System.out.println("Error: Handingle the data");
+		                } catch (Exception e) {
+		                	StackTraceElement l = e.getStackTrace()[0];
+		        			String erro = l.getClassName()+"/"+l.getMethodName()+":"+l.getLineNumber()+" "+l.getFileName()+" "+e.getMessage() +" "+ e.toString();
+		                    Utils.escreveTxt("EthernetIPClienteErroGeneral.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Exception: "+erro + " " + argumentos,true);
+		                    System.out.println("Error: Handingle/Parsing the data");
+		                }
+            		}else{
+            			int sizeOfTag = Integer.parseInt(tipos_tag[i].replaceAll("[^0-9.-]", ""));
+            			String tipo = tipos_tag[i].substring(0,tipos_tag[i].indexOf('{'));
+            			System.out.println("tipo:"+tipo + " sizeOfTag: " + sizeOfTag  );
+            			String limpa =  valores_str[i].replace("{", "");
+            			limpa = limpa.replace("}", "");
+            			String[] stringNumeros = limpa.split("\\,");
+            			
+            			Number numeros[] = new Number[stringNumeros.length];
+            			
+            			for (int j = 0; j < stringNumeros.length; j++) {
+							numeros[j] = Double.parseDouble(stringNumeros[j]);
+						}
+            			
+            			try {
+							valores[i]=new CIPData(retornaType(tipo), sizeOfTag);
+							for (int h = 0; h < numeros.length; h++) {
+								valores[i].set(h,numeros[h]);	
+							}
+						} catch (IndexOutOfBoundsException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+            			
+            		}
+            	
             }
         }
         try {
@@ -104,9 +136,9 @@ public class Principal {
 	            }
         	}
         	if(valores!=null) {
-                plc = new EtherNetIP(ip, slotX, porta);
+                plc = new EtherNetIP(ip, slotX);
                 try {
-					plc.connect();
+					plc.connectTcp();
 					//System.out.println("Connected: "+plc.toString());
 				} catch (Exception e) {
 					Writer writer = new StringWriter();
@@ -149,14 +181,16 @@ public class Principal {
     }
     
     private static CIPData.Type retornaType(String tipo) {
-        if(tipo.equals("DINT")) {
+        if(tipo.startsWith("DINT")) {
             return CIPData.Type.DINT;
-        }else if (tipo.equals("REAL")) {
+        }else if (tipo.startsWith("REAL")) {
             return CIPData.Type.REAL;
-        }else if (tipo.equals("INT")) {
+        }else if (tipo.startsWith("INT")) {
             return CIPData.Type.INT;
-        }else if (tipo.equals("SINT")) {
+        }else if (tipo.startsWith("SINT")) {
             return CIPData.Type.SINT;
+        }else if (tipo.startsWith("STR")) {
+            return CIPData.Type.STRUCT;
         }
         return null;
         
