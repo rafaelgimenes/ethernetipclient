@@ -12,7 +12,7 @@ public class Principal {
     public static void main(String[] args) {
        // enip_server -v  TEMP=REAL
     	//Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
-    	String versao = "0.10";
+    	String versao = "0.10b";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
@@ -40,12 +40,11 @@ public class Principal {
             valores_str = args[5].split(",(?=[^\\}]*(?:\\{|$))");
             valores = new CIPData[valores_str.length];
            
-          /*  for (int i = 0; i < args.length; i++) {
-                System.out.println(args[i]);
-            }
-            for (int i = 0; i < tags.length; i++) {
-                System.out.println(tags[i]);
-            }
+            
+            /*    System.out.println(argumentos);
+            
+            
+            
             for (int i = 0; i < valores_str.length; i++) {
                 System.out.println(valores_str[i]);
             }*/
@@ -65,6 +64,7 @@ public class Principal {
         
         if(tags!=null&&valores_str!=null&&slotX!=-1&&ip!=null) {
             for (int i = 0; i < valores.length; i++) {
+            	//System.out.println("(valores_str[i]: for?: "+ valores_str[i] );
             		if(!tipos_tag[i].contains("{")){
 		            	//remove chars deixa só numero
 		                valores_str[i]=valores_str[i].replaceAll("[^0-9.-]", "");
@@ -89,40 +89,61 @@ public class Principal {
 		                    Utils.escreveTxt("EthernetIPClienteErroGeneral.txt","\n"+Utils.pegarData2()+" "+Utils.pegarHora()+"\n Exception: "+erro + " " + argumentos,true);
 		                    System.out.println("Error: Handingle/Parsing the data");
 		                }
-            		}else{
-            			int sizeOfTag = Integer.parseInt(tipos_tag[i].replaceAll("[^0-9.-]", ""));
-            			String tipo = tipos_tag[i].substring(0,tipos_tag[i].indexOf('{'));
-            			System.out.println("tipo:"+tipo + " sizeOfTag: " + sizeOfTag  );
-            			String limpa =  valores_str[i].replace("{", "");
-            			limpa = limpa.replace("}", "");
-            			String[] stringNumeros = limpa.split("\\,");
-            			
-            			Number numeros[] = new Number[stringNumeros.length];
-            			
-            			for (int j = 0; j < stringNumeros.length; j++) {
-							numeros[j] = Double.parseDouble(stringNumeros[j]);
-						}
-            			
+            		}else{// são elementos
             			try {
-							valores[i]=new CIPData(retornaType(tipo), sizeOfTag);
-							for (int h = 0; h < numeros.length; h++) {
-								valores[i].set(h,numeros[h]);	
-							}
-						} catch (IndexOutOfBoundsException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-            			
+            				int sizeOfTag = Integer.parseInt(tipos_tag[i].replaceAll("[^0-9.-]", ""));
+            				String tipo = tipos_tag[i].substring(0,tipos_tag[i].indexOf('{'));
+            			//	System.out.println("tipo:"+tipo + " sizeOfTag: " + sizeOfTag + "  valores_str[i]:"+ valores_str[i]  );
+            				String valoresLimpo =  valores_str[i].replace("{", "");
+            				valoresLimpo = valoresLimpo.replace("}", "");
+            				valoresLimpo = valoresLimpo.replace("]", "");
+            				valoresLimpo = valoresLimpo.replace("[", "");
+            				valoresLimpo = valoresLimpo.replace(")", "");
+            				valoresLimpo = valoresLimpo.replace("(", "");
+            				String[] stringNumeros = valoresLimpo.split("\\,");
+            				//System.out.println("stringNumeros:"+stringNumeros.length);
+            				Number numeros[] = new Number[sizeOfTag];
+
+            				for (int j = 0; j < stringNumeros.length; j++) {
+            					numeros[j] = Double.parseDouble(stringNumeros[j]);
+            				}
+            				
+            				//tenta ler a tag pra manter o que tem
+            				if(valoresLimpo.contains("-99")){
+            					plc = new EtherNetIP(ip, slotX);
+            					plc.connectTcp();
+            					valores[i]=plc.readTag(tags[i],(short)10);
+            				}else{
+            					valores[i]=new CIPData(retornaType(tipo), sizeOfTag);
+            				}
+            				//valores[i]=new CIPData(retornaType(tipo), sizeOfTag);
+            				
+            				for (int h = 0; h < sizeOfTag; h++) {
+            					double value =-99; 
+            					 try {
+            						 value=(double) numeros[h];
+								} catch (NullPointerException n) {
+									valores[i].set(h,0);
+								}
+            					if(value!=-99.0){
+            						valores[i].set(h,value);
+            					}
+            				}
+
+            			} catch (Exception e) {
+            				System.out.println("Error: Elements: "+ e.getMessage() );
+            				e.printStackTrace();
+            			}
+
             		}
             	
             }
         }
         try {
+        	//System.out.println("TRY size:"+valores.length);
         	 //remover invalidos
         	if(invalidos.length()>0){
+        		//System.out.println("remover invalidos");
 	            String remover[] = invalidos.split("\\,");
 	            int cntRemove=0;
 	            for (int j = 0; j < remover.length; j++) {
@@ -135,7 +156,9 @@ public class Principal {
 	            	cntRemove++;
 	            }
         	}
+        	//System.out.println("valores size:"+valores.length);
         	if(valores!=null) {
+        		//System.out.println("valores diferente null");
                 plc = new EtherNetIP(ip, slotX);
                 try {
 					plc.connectTcp();
@@ -160,6 +183,7 @@ public class Principal {
 					}
 					System.out.println("Data Sent:"+ aux + " values: " + auxVal);
 				} catch (Exception e) {
+					e.printStackTrace();
 					Writer writer = new StringWriter();
 					e.printStackTrace(new PrintWriter(writer));
 					StackTraceElement l = e.getStackTrace()[0];

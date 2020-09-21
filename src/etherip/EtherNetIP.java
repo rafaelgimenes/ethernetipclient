@@ -584,6 +584,8 @@ public class EtherNetIP implements AutoCloseable
                         new UnconnectedSendProtocol(this.slot,
                                 new MessageRouterProtocol(CNService.CIP_MultiRequest, MessageRouter(),
                                         new CIPMultiRequestProtocol(writes)))));
+        
+        System.out.println("encap.getRequestSize();"+encap.getRequestSize());
         this.connection.execute(encap);
     }
 	
