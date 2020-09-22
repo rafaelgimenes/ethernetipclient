@@ -12,7 +12,7 @@ public class Principal {
     public static void main(String[] args) {
        // enip_server -v  TEMP=REAL
     	//Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
-    	String versao = "0.10b";
+    	String versao = "0.10c";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
@@ -100,13 +100,22 @@ public class Principal {
             				valoresLimpo = valoresLimpo.replace("[", "");
             				valoresLimpo = valoresLimpo.replace(")", "");
             				valoresLimpo = valoresLimpo.replace("(", "");
-            				String[] stringNumeros = valoresLimpo.split("\\,");
+            				
+            				String[] stringNumeros = null;
+            				
+            				try {
+								stringNumeros =  valoresLimpo.split("\\,");
+							} catch (Exception e) {
+
+							}
             				//System.out.println("stringNumeros:"+stringNumeros.length);
             				Number numeros[] = new Number[sizeOfTag];
 
-            				for (int j = 0; j < stringNumeros.length; j++) {
-            					numeros[j] = Double.parseDouble(stringNumeros[j]);
-            				}
+            				if(stringNumeros!=null&&stringNumeros.length>0)
+	            				for (int j = 0; j < stringNumeros.length; j++) {
+	            					if(stringNumeros[j].length()>0)
+	            						numeros[j] = Double.parseDouble(stringNumeros[j]);
+	            				}
             				
             				//tenta ler a tag pra manter o que tem
             				if(valoresLimpo.contains("-99")){
