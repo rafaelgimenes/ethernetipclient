@@ -26,7 +26,7 @@ public abstract class Connection implements AutoCloseable
     /** EtherIP uses little endian */
     final public static ByteOrder BYTE_ORDER = ByteOrder.LITTLE_ENDIAN;
 
-    final private static int BUFFER_SIZE = 1024;
+    final private static int BUFFER_SIZE = 1024+512;
 
     protected final int slot;
 

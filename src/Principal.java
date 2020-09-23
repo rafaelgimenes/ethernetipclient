@@ -12,7 +12,7 @@ public class Principal {
     public static void main(String[] args) {
        // enip_server -v  TEMP=REAL
     	//Shell.execComando("/usr/lib/jvm/jdk1.7.0_79/jre/bin/java -jar /home/rgimenes/ethernetip-master.jar 192.168.39.11 0 tempxxx,emfxxx,pppmxxx,carb 1543.9,-233,9.999,1.3444")
-    	String versao = "0.10c";
+    	String versao = "0.10d";
         CIPData[] valores = null;
         String ip = null;
         int porta = 44818;
